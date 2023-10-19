@@ -172,33 +172,71 @@
             }
         });
 
+
+        // for play on button up
         // Event listener for assigning songs to the initial buttons and dynamically added buttons
         const allButtons = document.querySelectorAll('.button');
         allButtons.forEach((button) => {
+            button.addEventListener("mousedown", () => {
+                if (!assignMode && button.dataset.song) {
+                    const audioPlayer = document.getElementById("audioPlayer");
+                    audioPlayer.pause();
+                    button.classList.remove("playing");
+                }
+            });
+
+            button.addEventListener("mouseup", () => {
+                if (!assignMode && button.dataset.song) {
+                    const audioPlayer = document.getElementById("audioPlayer");
+                    audioPlayer.src = button.dataset.song;
+                    audioPlayer.load();
+                    audioPlayer.play();
+                    button.classList.add("playing");
+                    if (playingButton && playingButton !== button) {
+                        playingButton.classList.remove("playing");
+                    }
+                    playingButton = button;
+                }
+            });
+
             button.addEventListener("click", () => {
                 if (assignMode) {
-                    // Trigger file input for the buttons
                     const fileInput = document.getElementById("fileInput");
                     fileInput.dataset.buttonId = button.id;
                     fileInput.click();
-                } else {
-                    const audioPlayer = document.getElementById("audioPlayer");
-                    const songUrl = button.dataset.song;
-                    if (songUrl) {
-                        audioPlayer.src = songUrl;
-                        audioPlayer.load();
-                        audioPlayer.play();
-                        // Change the button's class to "playing" when the song is played
-                        button.classList.add("playing");
-                        // Change the background color of the previously played button back to default
-                        if (playingButton && playingButton !== button) {
-                            playingButton.classList.remove("playing");
-                        }
-                        playingButton = button;
-                    }
                 }
             });
         });
+
+        // for play on button down
+
+        // // Event listener for assigning songs to the initial buttons and dynamically added buttons
+        // const allButtons = document.querySelectorAll('.button');
+        // allButtons.forEach((button) => {
+        //     button.addEventListener("click", () => {
+        //         if (assignMode) {
+        //             // Trigger file input for the buttons
+        //             const fileInput = document.getElementById("fileInput");
+        //             fileInput.dataset.buttonId = button.id;
+        //             fileInput.click();
+        //         } else {
+        //             const audioPlayer = document.getElementById("audioPlayer");
+        //             const songUrl = button.dataset.song;
+        //             if (songUrl) {
+        //                 audioPlayer.src = songUrl;
+        //                 audioPlayer.load();
+        //                 audioPlayer.play();
+        //                 // Change the button's class to "playing" when the song is played
+        //                 button.classList.add("playing");
+        //                 // Change the background color of the previously played button back to default
+        //                 if (playingButton && playingButton !== button) {
+        //                     playingButton.classList.remove("playing");
+        //                 }
+        //                 playingButton = button;
+        //             }
+        //         }
+        //     });
+        // });
 
         // Function to generate a random background color
         function getRandomColor() {
