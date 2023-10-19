@@ -40,7 +40,10 @@
         }
         /* Slightly darker gray background when a song is played */
         .playing {
-            background-color: #888888;
+            color: white;
+            border-radius: 3px;
+            border: 1px solid #000;
+            animation: colorTransition 1s infinite alternate;
         }
 
         .add-button {
@@ -61,6 +64,15 @@
                 grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
                 gap: 10px;
                 margin-top: 100px;
+            }
+        }
+
+        @keyframes colorTransition {
+            from {
+                color: white;
+            }
+            to {
+                color: transparent;
             }
         }
     </style>
@@ -96,7 +108,7 @@
             newButton.classList.add("button");
             newButton.id = newButtonId; // Set the button's ID
             newButton.textContent = "Select Song";
-            
+
             newButton.addEventListener("click", () => {
                 if (assignMode) {
                     // Trigger file input when in assign mode
@@ -131,7 +143,7 @@
                 toggleButton.textContent = "Play Mode";
             }
             const addButton = document.getElementById("addButton");
-            addButton.style.display = assignMode ? "block" : "none"; // Show "Add Button" in assign mode
+            addButton.style.display = assignMode ? "grid" : "none"; // Show "Add Button" in assign mode
         });
 
         // Function to add a new button
@@ -153,6 +165,10 @@
                 // Display the filename (without extension) as the button text
                 const fileName = file.name.split('.').slice(0, -1).join('.');
                 button.textContent = fileName;
+                // Change the button's background color to a random color
+                button.style.backgroundColor = getRandomColor();
+                button.style.borderRadius = "3px";
+                button.style.border = "1px solid #000";
             }
         });
 
@@ -167,19 +183,32 @@
                     fileInput.click();
                 } else {
                     const audioPlayer = document.getElementById("audioPlayer");
-                    audioPlayer.src = button.dataset.song;
-                    audioPlayer.load();
-                    audioPlayer.play();
-                    // Change the button's class to "playing" when the song is played
-                    button.classList.add("playing");
-                    // Change the background color of the previously played button back to default
-                    if (playingButton && playingButton !== button) {
-                        playingButton.classList.remove("playing");
+                    const songUrl = button.dataset.song;
+                    if (songUrl) {
+                        audioPlayer.src = songUrl;
+                        audioPlayer.load();
+                        audioPlayer.play();
+                        // Change the button's class to "playing" when the song is played
+                        button.classList.add("playing");
+                        // Change the background color of the previously played button back to default
+                        if (playingButton && playingButton !== button) {
+                            playingButton.classList.remove("playing");
+                        }
+                        playingButton = button;
                     }
-                    playingButton = button;
                 }
             });
         });
+
+        // Function to generate a random background color
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
     </script>
 </body>
 </html>
