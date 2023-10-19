@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayIt!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* Set to 4 columns */
+            gap: 10px;
+            max-width: 600px;
+            margin: 100px auto 0;
+        }
+        .assign-mode-button {
+            width: 100px;
+            height: 100px;
+            margin: auto;
+            color: #000; /* Black font color */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .button {
+            width: 100px;
+            height: 100px;
+            margin: auto;
+            color: #000; /* Black font color */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        /* Slightly darker gray background when a song is played */
+        .playing {
+            background-color: #888888;
+        }
+
+        .add-button {
+            width: 100px;
+            height: 100px;
+            margin: auto;
+            color: #000; /* Black font color */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            display: grid; /* Initially show */
+        }
+        @media (max-width: 600px) {
+            /* Make buttons responsive on smaller screens */
+            .button-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
+                margin-top: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="toggleButton" class="assign-mode-button assign-mode">Assign Mode</button>
+    <div class="button-grid" id="buttonGrid">
+        <!-- Six buttons added when the website starts -->
+        <button class="button" id="button1">Select Song</button>
+        <button class="button" id="button2">Select Song</button>
+        <button class="button" id="button3">Select Song</button>
+        <button class="button" id="button4">Select Song</button>
+        <button class="button" id="button5">Select Song</button>
+        <button class="button" id="button6">Select Song</button>
+        <button class="button" id="button7">Select Song</button>
+        <button class="button" id="button8">Select Song</button>
+        <button class="add-button" id="addButton">Add Button</button>
+    </div>
+    <input type="file" id="fileInput" accept="audio/*" style="display: none;">
+    <audio id="audioPlayer" controls style="display: none;"></audio>
+    <script>
+        let assignMode = true;
+        let buttons = [];
+        let playingButton = null;
+
+        // Function to create a new button
+        function createButton() {
+            const newButton = document.createElement("button");
+            newButton.classList.add("button");
+            newButton.textContent = "Select Song";
+            newButton.addEventListener("click", () => {
+                if (assignMode) {
+                    // Trigger file input when in assign mode
+                    const fileInput = document.getElementById("fileInput");
+                    fileInput.dataset.buttonId = newButton.id;
+                    fileInput.click();
+                } else {
+                    const audioPlayer = document.getElementById("audioPlayer");
+                    audioPlayer.src = newButton.dataset.song;
+                    audioPlayer.load();
+                    audioPlayer.play();
+                    // Change the button's class to "playing" when the song is played
+                    newButton.classList.add("playing");
+                    // Change the background color of the previously played button back to default
+                    if (playingButton && playingButton !== newButton) {
+                        playingButton.classList.remove("playing");
+                    }
+                    playingButton = newButton;
+                }
+            });
+            return newButton;
+        }
+
+        // Function to toggle assign mode
+        document.getElementById("toggleButton").addEventListener("click", () => {
+            assignMode = !assignMode;
+            const toggleButton = document.getElementById("toggleButton");
+            // Toggle the button text
+            if (assignMode) {
+                toggleButton.textContent = "Assign Mode";
+            } else {
+                toggleButton.textContent = "Play Mode";
+            }
+            const addButton = document.getElementById("addButton");
+            addButton.style.display = assignMode ? "block" : "none"; // Show "Add Button" in assign mode
+        });
+
+        // Function to add a new button before the second to last button
+        document.getElementById("addButton").addEventListener("click", () => {
+            const buttonGrid = document.getElementById("buttonGrid");
+            const newButton = createButton();
+
+            // Find the second to last button and insert the new button before it
+            const secondToLastButton = buttonGrid.children[buttonGrid.children.length - 2];
+            buttonGrid.insertBefore(newButton, secondToLastButton);
+        });
+
+        // Event listener for file input change
+        document.getElementById("fileInput").addEventListener("change", (event) => {
+            const fileInput = event.target;
+            const buttonId = fileInput.dataset.buttonId;
+            const button = document.getElementById(buttonId);
+            const file = event.target.files[0];
+            if (file) {
+                // Assign the selected file to the button
+                button.dataset.song = URL.createObjectURL(file);
+                // Display the filename (without extension) as the button text
+                const fileName = file.name.split('.').slice(0, -1).join('.');
+                button.textContent = fileName;
+            }
+        });
+
+        // Event listener for assigning songs to the initial buttons and dynamically added buttons
+        const allButtons = document.querySelectorAll('.button');
+        allButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                if (assignMode) {
+                    // Trigger file input for the buttons
+                    const fileInput = document.getElementById("fileInput");
+                    fileInput.dataset.buttonId = button.id;
+                    fileInput.click();
+                } else {
+                    const audioPlayer = document.getElementById("audioPlayer");
+                    audioPlayer.src = button.dataset.song;
+                    audioPlayer.load();
+                    audioPlayer.play();
+                    // Change the button's class to "playing" when the song is played
+                    button.classList.add("playing");
+                    // Change the background color of the previously played button back to default
+                    if (playingButton && playingButton !== button) {
+                        playingButton.classList.remove("playing");
+                    }
+                    playingButton = button;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
