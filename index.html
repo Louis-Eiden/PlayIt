@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlayIt!</title>
+    <!-- Add Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,6 +41,13 @@
             align-items: center;
             cursor: pointer;
         }
+        .toggle-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns for toggle buttons */
+            gap: 10px;
+            max-width: 220px; /* Adjust the max-width as needed */
+            margin: 0 auto;
+        }
         /* Slightly darker gray background when a song is played */
         .playing {
             color: white;
@@ -46,7 +55,6 @@
             border: 1px solid #000;
             animation: colorTransition 1s infinite alternate;
         }
-
         .add-button {
             width: 100px;
             height: 100px;
@@ -67,7 +75,6 @@
                 margin-top: 50px;
             }
         }
-
         @keyframes colorTransition {
             from {
                 color: white;
@@ -79,7 +86,10 @@
     </style>
 </head>
 <body>
-    <button id="toggleButton" class="assign-mode-button assign-mode">Assign Mode</button>
+    <div class="toggle-buttons">
+        <button id="toggleButton" class="assign-mode-button assign-mode">Assign Mode</button>
+        <button id="playButton" class="assign-mode-button start-button"><i class="fas fa-play"></i></button>
+    </div>
     <div class="button-grid" id="buttonGrid">
         <!-- Eight buttons added when the website starts -->
         <button class="button" id="button1">Select Song</button>
@@ -96,12 +106,11 @@
     <audio id="audioPlayer" controls style="display: none;"></audio>
     <script>
         let assignMode = true;
-        let buttons = [];
         let playingButton = null;
+        let playing = false; // Track if a song is currently playing
 
         // Function to create a new button with an increasing ID
         let newButtonIdCounter = 9; // Starting ID for new buttons
-
         function createButton() {
             const newButton = document.createElement("button");
             const newButtonId = `button${newButtonIdCounter}`;
@@ -128,6 +137,8 @@
                         playingButton.classList.remove("playing");
                     }
                     playingButton = newButton;
+                    playing = true; // A song is playing
+                    document.getElementById("playButton").innerHTML = '<i class="fas fa-pause"></i>';
                 }
             });
             return newButton;
@@ -173,6 +184,39 @@
             }
         });
 
+        // Function to toggle the play/pause button and control audio playback
+        document.getElementById("playButton").addEventListener("click", () => {
+            const audioPlayer = document.getElementById("audioPlayer");
+            if (playing) {
+                // If a song is currently playing, pause it and update the button to play symbol
+                audioPlayer.pause();
+                document.getElementById("playButton").innerHTML = '<i class="fas fa-play"></i>';
+                playing = false;
+            } else {
+                // If no song is playing, check if there's a song to play
+                const songUrl = playingButton ? playingButton.dataset.song : null;
+                if (songUrl) {
+                    if (audioPlayer.src === songUrl) {
+                        // If the same song is being resumed, set the playback position to where it was stopped
+                        audioPlayer.play();
+                        audioPlayer.currentTime = audioPlayer.dataset.currentTime;
+                    } else {
+                        audioPlayer.src = songUrl;
+                        audioPlayer.load();
+                        audioPlayer.play();
+                    }
+                    document.getElementById("playButton").innerHTML = '<i class="fas fa-pause"></i>';
+                    playing = true;
+                }
+            }
+        });
+
+        // Remember and store the current playback position in a dataset attribute
+        audioPlayer.addEventListener("timeupdate", () => {
+            audioPlayer.dataset.currentTime = audioPlayer.currentTime;
+        });
+
+
         // for play on button up
         // Event listener for assigning songs to the initial buttons and dynamically added buttons
         const allButtons = document.querySelectorAll('.button');
@@ -182,6 +226,8 @@
                     const audioPlayer = document.getElementById("audioPlayer");
                     audioPlayer.pause();
                     button.classList.remove("playing");
+                    playing = false;
+                    document.getElementById("playButton").innerHTML = '<i class="fas fa-play"></i>';
                 }
             });
 
@@ -196,6 +242,8 @@
                         playingButton.classList.remove("playing");
                     }
                     playingButton = button;
+                    playing = true;
+                    document.getElementById("playButton").innerHTML = '<i class="fas fa-pause"></i>';
                 }
             });
 
